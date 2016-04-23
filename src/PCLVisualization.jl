@@ -8,6 +8,7 @@ export PointCloudColorHandler, PointCloudColorHandlerRGBField,
     removeAllCoordinateSystems, resetStoppedFlag, updateCamera, resetCamera,
     spin, setShowFPS,
     addPointCloud, updatePointCloud, removePointCloud, addText, updateText,
+    registerPointPickingCallback,
     getRenderWindow, hasInteractor, setOffScreenRendering, renderedData
 
 
@@ -75,6 +76,15 @@ function PCLVisualizer(name::AbstractString=""; create_interactor::Bool=true)
         "\$(pointer(name)), \$create_interactor")
     PCLVisualizer(handle)
 end
+PCLCommon.use_count(viewer::PCLVisualizer) = use_count(viewer.handle)
+Base.pointer(viewer::PCLVisualizer) = pointer(viewer.handle)
+function Base.convert(::Type{PCLVisualizer},
+        p::pcpp"pcl::visualization::PCLVisualizer")
+    sp = icxx"return boost::shared_ptr<pcl::visualization::PCLVisualizer>($p);"
+    PCLVisualizer(sp)
+end
+Base.convert(::Type{PCLVisualizer}, p::Ptr{Void}) =
+    convert(PCLVisualizer, pcpp"pcl::visualization::PCLVisualizer"(p))
 
 setBackgroundColor(viewer::PCLVisualizer, x, y, z) =
     icxx"$(viewer.handle)->setBackgroundColor($x, $y, $z);"
@@ -187,6 +197,24 @@ function run(viewer::PCLVisualizer; spin::Int=1, sleep::Int=100000)
         boost::this_thread::sleep(boost::posix_time::microseconds($sleep));
     }
     """
+end
+
+# callback must be a valid c function pointer
+function registerPointPickingCallback(viewer::PCLVisualizer, callback::Ptr{Void},
+        args=C_NULL)
+    @assert callback != C_NULL
+    icxx"""
+        $(viewer.handle)->registerPointPickingCallback(
+            (void(*)(const pcl::visualization::PointPickingEvent&,void*))$(callback),
+            (void*)$args);
+    """
+end
+
+function registerPointPickingCallback(viewer::PCLVisualizer, callback::Function,
+        args=C_NULL)
+    ccallback = cfunction(callback, Void,
+        (cxxt"const pcl::visualization::PointPickingEvent&", Ptr{Void}))
+    registerPointPickingCallback(viewer, ccallback, args)
 end
 
 ### For off-screen rendering ###
