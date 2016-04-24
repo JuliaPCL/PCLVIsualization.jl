@@ -6,7 +6,7 @@ export PointCloudColorHandler, PointCloudColorHandlerRGBField,
     setCameraPosition, setCameraClipDistances, initCameraParameters,
     wasStopped, removeAllPointClouds, removeAllShapes,
     removeAllCoordinateSystems, resetStoppedFlag, updateCamera, resetCamera,
-    spin, setShowFPS,
+    spin, setShowFPS, setPointCloudRenderingProperties,
     addPointCloud, updatePointCloud, removePointCloud, addText, updateText,
     registerPointPickingCallback,
     getRenderWindow, hasInteractor, setOffScreenRendering, renderedData
@@ -32,7 +32,10 @@ cxx"""
 #define protected public  // to access PCLVisualizer::interactor_
 #include <pcl/visualization/pcl_visualizer.h>
 #undef protected
+#include <pcl/visualization/common/common.h>
 """
+
+include("const.jl")
 
 abstract PointCloudColorHandler
 
@@ -135,6 +138,16 @@ for f in [
 end
 setShowFPS(viewer::PCLVisualizer, v::Bool) =
     icxx"$(viewer.handle)->setShowFPS($v);"
+function setPointCloudRenderingProperties(viewer::PCLVisualizer, property,
+        value; id::AbstractString="cloud", viewport::Int=0)
+    icxx"$(viewer.handle)->setPointCloudRenderingProperties(
+            $property, $value, $id, $viewport);"
+end
+function setPointCloudRenderingProperties(viewer::PCLVisualizer, property,
+        val1, val2, val3; id::AbstractString="cloud", viewport::Int=0)
+    icxx"$(viewer.handle)->setPointCloudRenderingProperties(
+            $property, $val1, $val2, $val3, $id, $viewport);"
+end
 
 function addPointCloud{T}(viewer::PCLVisualizer, cloud::PointCloud{T};
     id::AbstractString="cloud", viewport::Int=0)

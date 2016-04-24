@@ -22,10 +22,8 @@ function ppcallback(event::cxxt"pcl::visualization::PointPickingEvent&",
     red_handler = PointCloudColorHandlerCustom(clicked_points, 255, 0, 0)
     removePointCloud(viewer, id="clicked_points")
     addPointCloud(viewer, clicked_points, red_handler, id="clicked_points")
-    icxx"""
-    $(viewer.handle)->setPointCloudRenderingProperties(
-        pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 10, "clicked_points");
-    """
+    setPointCloudRenderingProperties(viewer, PCL_VISUALIZER_POINT_SIZE, 10,
+        id="clicked_points")
 
     return nothing::Void
 end
