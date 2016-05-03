@@ -133,7 +133,7 @@ for f in [
         :resetCamera,
         :spin,
         ]
-    body = Expr(:macrocall, symbol("@icxx_str"), "\$(viewer.handle)->$f();")
+    body = Expr(:macrocall, Symbol("@icxx_str"), "\$(viewer.handle)->$f();")
     @eval $f(viewer::PCLVisualizer) = $body
 end
 setShowFPS(viewer::PCLVisualizer, v::Bool) =

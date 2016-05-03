@@ -27,7 +27,7 @@ for name in [
     :PCL_VISUALIZER_LUT_HSV_INVERSE,
     :PCL_VISUALIZER_LUT_GREY,
     ]
-    ex = Expr(:macrocall, symbol("@icxx_str"), string("pcl::visualization::", name, ";"))
+    ex = Expr(:macrocall, Symbol("@icxx_str"), string("pcl::visualization::", name, ";"))
     @eval begin
         global const $name = $ex
         @assert isa($name, Cxx.CppEnum)
