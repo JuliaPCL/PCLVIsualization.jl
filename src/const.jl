@@ -28,8 +28,11 @@ for name in [
     :PCL_VISUALIZER_LUT_GREY,
     ]
     ex = Expr(:macrocall, Symbol("@icxx_str"), string("pcl::visualization::", name, ";"))
+    cppname = string("pcl::visualization::", name)
     @eval begin
-        global const $name = $ex
+        @doc """
+        $($cppname)
+        """ global const $name = $ex
         @assert isa($name, Cxx.CppEnum)
         export $name
     end
