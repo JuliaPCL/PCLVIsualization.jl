@@ -1,3 +1,12 @@
+"""
+3D point cloud visualization
+
+http://docs.pointclouds.org/trunk/group__visualization.html
+
+## Exports
+
+$(EXPORTS)
+"""
 module PCLVisualization
 
 export PointCloudColorHandler, PointCloudColorHandlerRGBField,
@@ -11,7 +20,7 @@ export PointCloudColorHandler, PointCloudColorHandlerRGBField,
     registerPointPickingCallback,
     getRenderWindow, hasInteractor, setOffScreenRendering, renderedData
 
-
+using DocStringExtensions
 using LibPCL
 using PCLCommon
 using Cxx
