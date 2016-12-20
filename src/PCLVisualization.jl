@@ -13,10 +13,12 @@ export PointCloudColorHandler, PointCloudColorHandlerRGBField,
     PointCloudColorHandlerCustom,
     PCLVisualizer, setBackgroundColor, addCoordinateSystem, spinOnce,
     setCameraPosition, setCameraClipDistances, initCameraParameters,
-    wasStopped, removeAllPointClouds, removeAllShapes,
+    wasStopped, removeAllPointClouds, removeAllShapes, removeShape,
     removeAllCoordinateSystems, resetStoppedFlag, updateCamera, resetCamera,
     spin, setShowFPS, setPointCloudRenderingProperties,
+    setShapeRenderingProperties,
     addPointCloud, updatePointCloud, removePointCloud, addText, updateText,
+    addCube,
     registerPointPickingCallback,
     getRenderWindow, hasInteractor, setOffScreenRendering, renderedData
 
@@ -150,12 +152,26 @@ setShowFPS(viewer::PCLVisualizer, v::Bool) =
 function setPointCloudRenderingProperties(viewer::PCLVisualizer, property,
         value; id::AbstractString="cloud", viewport::Int=0)
     icxx"$(viewer.handle)->setPointCloudRenderingProperties(
-            $property, $value, $id, $viewport);"
+            $property, $value, $(pointer(id)), $viewport);"
 end
 function setPointCloudRenderingProperties(viewer::PCLVisualizer, property,
         val1, val2, val3; id::AbstractString="cloud", viewport::Int=0)
     icxx"$(viewer.handle)->setPointCloudRenderingProperties(
-            $property, $val1, $val2, $val3, $id, $viewport);"
+            $property, $val1, $val2, $val3, $(pointer(id)), $viewport);"
+end
+function setShapeRenderingProperties(viewer::PCLVisualizer, property, value,
+    id::AbstractString; viewport=0)
+    icxx"$(viewer.handle)->setShapeRenderingProperties(
+            $property, $value, $(pointer(id)), $viewport);"
+end
+function setShapeRenderingProperties(viewer::PCLVisualizer, property,
+        val1, val2, val3, id::AbstractString; viewport::Int=0)
+    icxx"$(viewer.handle)->setShapeRenderingProperties(
+            $property, $val1, $val2, $val3, $(pointer(id)), $viewport);"
+end
+
+function removeShape(viewer::PCLVisualizer, name::AbstractString)
+    icxx"$(viewer.handle)->removeShape($(pointer(name)));"
 end
 
 function addPointCloud{T}(viewer::PCLVisualizer, cloud::PointCloud{T};
@@ -210,6 +226,17 @@ function updateText(viewer::PCLVisualizer, text::AbstractString, xpos, ypos,
         r, g, b; id::AbstractString="")
     icxx"$(viewer.handle)->updateText($(pointer(text)), $xpos, $ypos,
         $r, $g, $b, $(pointer(id)));"
+end
+
+function addCube(viewer::PCLVisualizer, coeffs, name::AbstractString)
+    icxx"$(viewer.handle)->addCube($coeffs, $(pointer(name)));"
+end
+function addCube(viewer::PCLVisualizer, x_min, x_max, y_min, y_max, z_min, z_max;
+    r=1.0, g=1.0, b=1.0, id::AbstractString="cube", viewport=0)
+    icxx"""
+    $(viewer.handle)->addCube($x_min, $x_max, $y_min, $y_max, $z_min, $z_max,
+        $r, $g, $b, $(pointer(id)), $(viewport));
+    """
 end
 
 function run(viewer::PCLVisualizer; spin::Int=1, sleep::Int=100000)
